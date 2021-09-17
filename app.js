@@ -62,8 +62,8 @@ const newsService = (function () {
     const apiUrl = 'https://newsapi.org/v2'
 
     return {
-        topHeadlines(country = 'ua', cb) {
-            http.get(`${apiUrl}/top-headlines?country=${country}&apiKey=${apiKey}`, cb)
+        topHeadlines({country = 'ua', category= 'sport'}, cb) {
+            http.get(`${apiUrl}/top-headlines?country=${country}&category=${category}&apiKey=${apiKey}`, cb)
         },
         everything(query, cb) {
             http.get(`${apiUrl}/everything?q=${query}&apiKey=${apiKey}`, cb)
@@ -74,6 +74,7 @@ const newsService = (function () {
 //Elements
 const form = document.forms['newsControls']
 const countrySelect = form.elements['country']
+const categorySelect = form.elements['category']
 const searchInput = form.elements['search']
 
 form.addEventListener('submit', e => {
@@ -92,10 +93,13 @@ function loadNews() {
     showLoader()
 
     const country = countrySelect.value
+    const category = categorySelect.value
     const searchText = searchInput.value
+
 
     if (!searchText) {
         newsService.topHeadlines(country, onGetResponse)
+        newsService.topHeadlines(category, onGetResponse)
     } else {
         newsService.everything(searchText, onGetResponse)
     }
@@ -121,7 +125,7 @@ function onGetResponse(err, res) {
 //function render news
 function renderNews(news) {
     const newsContainer = document.querySelector('.news-container .row')
-    if (newsContainer.children.length){
+    if (newsContainer.children.length) {
         clearContainer(newsContainer)
     }
     let fragment = ''
@@ -142,8 +146,12 @@ function clearContainer(container) {
         child = container.lastElementChild;
     }
 }
+
 //News item template function
 function newsTemplate({urlToImage, title, url, description}) {
+    if (!urlToImage) {
+        urlToImage = "https://www.cnet.com/a/img/o-0yiCd4itJppgEhdLbSCfZsCxo=/1200x630/2021/09/17/85b8899d-d843-4589-a02c-1e2d32c337c1/isaacman.jpg"
+    }
     return `
     <div class="col s12">
         <div class="card">
